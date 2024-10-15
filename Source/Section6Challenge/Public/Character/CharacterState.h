@@ -17,7 +17,9 @@ enum class EActionState : uint8
 UENUM()
 enum class EEnemyState : uint8
 {
-	EES_Patrol,
-	EES_Waiting,
-	EES_Chasing,
+	EES_Patrol UMETA(DisplayName = "Patrol"),
+	EES_Waiting UMETA(DisplayName = "Waiting"),
+	EES_Chasing UMETA(DisplayName = "Chasing"),
+	EEC_Attacking UMETA(DisplayName = "Attacking"),
+	EEC_Beaten,
 };

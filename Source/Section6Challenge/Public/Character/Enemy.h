@@ -12,6 +12,7 @@ class UHealthBarComponent;
 class UAttributeComponent;
 class UPawnSensingComponent;
 class AAIController;
+class UAnimMontage;
 
 UCLASS()
 class SECTION6CHALLENGE_API AEnemy : public ABaseCharacter
@@ -29,6 +30,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+	virtual void Attack() override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -61,13 +64,16 @@ private:
 
 
 	UPROPERTY(EditDefaultsOnly)
-	float RemoveHealthWidget = 500.f;
+	float RemoveHealthWidgetRadius = 500.f;
 
 	UPROPERTY(EditAnywhere)
 	float PatrolRadius = 200.f;
 
 	UPROPERTY()
 	int PatrolIndex = 0;
+
+	UPROPERTY(EditAnywhere)
+	float AttackRadius = 130.f;
 
 	UPROPERTY(VisibleAnywhere)
 	AActor* Causer;
@@ -83,6 +89,9 @@ private:
 
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	TArray<AActor*> Patrols;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* AttackMontage;
 
 public:
 	FORCEINLINE bool Get_BisDead() { return BisDead; }

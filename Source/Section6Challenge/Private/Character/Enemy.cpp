@@ -96,7 +96,7 @@ void AEnemy::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (Causer)
 	{
-		if (!IsInRange(Causer, RemoveHealthWidget))
+		if (!IsInRange(Causer, RemoveHealthWidgetRadius))
 		{
 			Causer = nullptr;
 			if (HealthBarWidget == nullptr) return;
@@ -108,9 +108,17 @@ void AEnemy::Tick(float DeltaTime)
 	{
 		if (BisDead) return;
 
-		if (EnemyState == EEnemyState::EES_Chasing) {
-			MoveToTarget(Patrol);
-			if (!IsInRange(Patrol, RemoveHealthWidget))
+		if (EnemyState == EEnemyState::EES_Chasing) 
+		{
+			FAIMoveRequest MoveRequest;
+			MoveRequest.SetGoalActor(Patrol);
+			MoveRequest.SetAcceptanceRadius(60.f);
+			EnenmyController->MoveTo(MoveRequest);
+			if (IsInRange(Patrol, AttackRadius))
+			{
+				Attack();
+			}
+			if (!IsInRange(Patrol, RemoveHealthWidgetRadius))
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("lose interesting"));
 				GetCharacterMovement()->MaxWalkSpeed = 175.f;
@@ -152,6 +160,7 @@ void AEnemy::Tick(float DeltaTime)
 
 void AEnemy::PawnSeen(APawn* Pawn)
 {
+	if (EnemyState == EEnemyState::EEC_Attacking) return;
 	EnemyState = EEnemyState::EES_Chasing;
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	AActor* PlayerStart = PlayerController->GetPawn();
@@ -159,17 +168,23 @@ void AEnemy::PawnSeen(APawn* Pawn)
 	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 }
 
+void AEnemy::Die()
+{
+	Super::Die();
+	BisDead = true;
+}
+
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (BisDead) return 0;
-
-	EnemyState = EEnemyState::EES_Chasing;
 
 	Causer = EventInstigator->GetPawn();
 
 	Patrol = Causer;
 
 	GetCharacterMovement()->MaxWalkSpeed = 300.f;
+
+	if (Get_Correct_Montage(AttackDirectTion) == nullptr) return 0;
 
 	if (AttributeComponent && HealthBarWidget)
 	{
@@ -178,21 +193,27 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 		HealthBarWidget->SetHealthPercent(AttributeComponent->GetHelthPercent());
 
 		HealthBarWidget->SetVisibility(true);
-
-		if (Get_Correct_Montage(AttackDirectTion) == nullptr) return 0;
-
-		PlayAnimMontage(Get_Correct_Montage(AttackDirectTion));
 	}
 
+	PlayAnimMontage(Get_Correct_Montage(AttackDirectTion));
+
+	if (EnemyState != EEnemyState::EEC_Attacking)
+	{
+		EnemyState = EEnemyState::EES_Chasing;
+	}
+	
 	if (AttributeComponent->Get_Health() == 0) Die();
 
 	return DamageAmount;
 }
 
-void AEnemy::Die()
+void AEnemy::Attack()
 {
-	Super::Die();
-	BisDead = true;
+	if (AttackMontage == nullptr) return;
+
+	PlayAnimMontage(AttackMontage);
+
+	EnemyState = EEnemyState::EEC_Attacking;
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
