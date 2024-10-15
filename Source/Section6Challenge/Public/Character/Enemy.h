@@ -45,6 +45,12 @@ private:
 
 	void MoveToTarget(AActor* Target);
 
+	void RemoveHealthBar();
+
+	void SeePlayer();
+
+	void Guarding();
+
 private:
 	UPROPERTY()
 	FTimerHandle PatrolTimer;

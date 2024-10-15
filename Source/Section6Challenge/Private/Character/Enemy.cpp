@@ -91,9 +91,8 @@ void AEnemy::MoveToTarget(AActor* Target)
 	EnenmyController->MoveTo(MoveRequest);
 }
 
-void AEnemy::Tick(float DeltaTime)
+void AEnemy::RemoveHealthBar()
 {
-	Super::Tick(DeltaTime);
 	if (Causer)
 	{
 		if (!IsInRange(Causer, RemoveHealthWidgetRadius))
@@ -103,58 +102,67 @@ void AEnemy::Tick(float DeltaTime)
 			HealthBarWidget->SetVisibility(false);
 		}
 	}
+}
+
+void AEnemy::SeePlayer()
+{
+	if (EnemyState == EEnemyState::EES_Chasing)
+	{
+		FAIMoveRequest MoveRequest;
+		MoveRequest.SetGoalActor(Patrol);
+		MoveRequest.SetAcceptanceRadius(60.f);
+		EnenmyController->MoveTo(MoveRequest);
+		if (IsInRange(Patrol, AttackRadius))
+		{
+			Attack();
+		}
+		if (!IsInRange(Patrol, RemoveHealthWidgetRadius))
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("lose interesting"));
+			GetCharacterMovement()->MaxWalkSpeed = 175.f;
+			Patrol = Patrols[PatrolIndex];
+			MoveToTarget(Patrol);
+			BisArrived = false;
+			EnemyState = EEnemyState::EES_Patrol;
+		}
+	}
+}
+
+void AEnemy::Guarding()
+{
+	if (IsInRange(Patrol, PatrolRadius) && !BisArrived)
+	{
+		BisArrived = true;
+		GetWorldTimerManager().SetTimer(PatrolTimer, this, &AEnemy::PatrolWatingFinish, 3.f);
+	}
+	if (IsInRange(Patrol, PatrolRadius) && EnemyState == EEnemyState::EES_Patrol)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("moving"));
+		if (Patrols.Num() > 0)
+		{
+			PatrolIndex = (PatrolIndex + 1) % Patrols.Num();
+			AActor* Target = Patrols[PatrolIndex];
+			Patrol = Target;
+			MoveToTarget(Patrol);
+			EnemyState = EEnemyState::EES_Waiting;
+			BisArrived = false;
+		}
+	}
+}
+
+void AEnemy::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+	RemoveHealthBar();
 
 	if (Patrol && EnenmyController)
 	{
 		if (BisDead) return;
 
-		if (EnemyState == EEnemyState::EES_Chasing) 
-		{
-			FAIMoveRequest MoveRequest;
-			MoveRequest.SetGoalActor(Patrol);
-			MoveRequest.SetAcceptanceRadius(60.f);
-			EnenmyController->MoveTo(MoveRequest);
-			if (IsInRange(Patrol, AttackRadius))
-			{
-				Attack();
-			}
-			if (!IsInRange(Patrol, RemoveHealthWidgetRadius))
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("lose interesting"));
-				GetCharacterMovement()->MaxWalkSpeed = 175.f;
-				Patrol = Patrols[PatrolIndex];
-				MoveToTarget(Patrol);
-				BisArrived = false;
-				EnemyState = EEnemyState::EES_Patrol;
-			}
-		}
+		SeePlayer();
 
-		if (IsInRange(Patrol, PatrolRadius) && !BisArrived)
-		{
-			BisArrived = true;
-			GetWorldTimerManager().SetTimer(PatrolTimer, this, &AEnemy::PatrolWatingFinish, 3.f);
-		}
-		if (IsInRange(Patrol, PatrolRadius) && EnemyState == EEnemyState::EES_Patrol)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("moving"));
-			if (Patrols.Num() > 0)
-			{
-				PatrolIndex = (PatrolIndex + 1) % Patrols.Num();
-				AActor* Target = Patrols[PatrolIndex];
-				Patrol = Target;
-				MoveToTarget(Patrol);
-				EnemyState = EEnemyState::EES_Waiting;
-				BisArrived = false;
-			}
-		}
-
-		//if (!IsInRange(Patrol, PatrolRadius))
-		//{
-		//	FAIMoveRequest MoveRequest;
-		//	MoveRequest.SetGoalActor(Patrol);
-		//	MoveRequest.SetAcceptanceRadius(15.f);
-		//	EnenmyController->MoveTo(MoveRequest);
-		//}
+		Guarding();
 	}
 }
 
