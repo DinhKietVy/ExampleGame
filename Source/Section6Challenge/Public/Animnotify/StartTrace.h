@@ -7,6 +7,7 @@
 #include "StartTrace.generated.h"
 
 class AWoman;
+class ABaseCharacter;
 
 UCLASS()
 class SECTION6CHALLENGE_API UStartTrace : public UAnimNotify
@@ -17,5 +18,5 @@ class SECTION6CHALLENGE_API UStartTrace : public UAnimNotify
 private:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 
-	AWoman* Woman;
+	ABaseCharacter* Character;
 };

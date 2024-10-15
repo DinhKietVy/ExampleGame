@@ -9,7 +9,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Actor/Sword.h"
-#include "Animation/AnimMontage.h"
 
 
 AWoman::AWoman()
@@ -27,11 +26,6 @@ AWoman::AWoman()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 550.0f, 0.0);
 }
-
-void AWoman::I_Set_AttackDirection(const FVector& AttackDirection)
-{
-}
-
 
 void AWoman::BeginPlay()
 {
@@ -52,11 +46,6 @@ void AWoman::GetHit(const FVector_NetQuantize& ImpactPoint)
 	if (HittedMontage == nullptr) return;
 
 	PlayAnimMontage(HittedMontage);
-}
-
-void AWoman::I_GetAttackDirection(const FVector& AttackDirection)
-{
-	auto Cross = FVector::CrossProduct(AttackDirection, GetActorForwardVector());
 }
 
 void AWoman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

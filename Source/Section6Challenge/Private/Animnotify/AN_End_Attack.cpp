@@ -3,6 +3,7 @@
 
 #include "Animnotify/AN_End_Attack.h"
 #include "Character/Woman.h"
+#include "Character/BaseCharacter.h"
 #include "Actor/Sword.h"
 
 void UAN_End_Attack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
@@ -10,16 +11,21 @@ void UAN_End_Attack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase*
 	Super::Notify( MeshComp,Animation,EventReference);
 	if (MeshComp == nullptr) return;
 
-	Character = Cast<AWoman>(MeshComp->GetOwner());
+	Woman = Cast<AWoman>(MeshComp->GetOwner());
+	Character = Cast<ABaseCharacter>(MeshComp->GetOwner());
 
 	if (Character)
 	{
-	Character->ActionState = EActionState::EAS_Unoccupied;
-	Character->AttackIndex = 0;
-	Character->IsAttack = false;
-	Character->bCanCombo = false;
-	Character->bCanTrace = false;
-	Character->Get_Sword()->Get_ActorHitted()->Empty();
+		Character->IsAttack = false;
+		Character->bCanCombo = false;
+		Character->bCanTrace = false;
+	}
+
+	if (Woman)
+	{
+	Woman->ActionState = EActionState::EAS_Unoccupied;
+	Woman->AttackIndex = 0;
+	Woman->Get_Sword()->Get_ActorHitted()->Empty();
 	}
 
 }

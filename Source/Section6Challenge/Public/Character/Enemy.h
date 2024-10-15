@@ -3,8 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
-#include "Interface/HitInterface.h"
+#include "BaseCharacter.h"
 #include "CharacterState.h"
 #include "Enemy.generated.h"
 
@@ -15,7 +14,7 @@ class UPawnSensingComponent;
 class AAIController;
 
 UCLASS()
-class SECTION6CHALLENGE_API AEnemy : public ACharacter, public IHitInterface
+class SECTION6CHALLENGE_API AEnemy : public ABaseCharacter
 {
 	GENERATED_BODY()
 
@@ -29,16 +28,12 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void GetHit(const FVector_NetQuantize& ImpactPoint) override;
-
-	virtual void I_GetAttackDirection(const FVector& AttackDirection) override;
-
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 protected:
 	virtual void BeginPlay() override;
 
-	UAnimMontage* Get_Correct_Montage(const FVector& AttackDirection);
+	void Die() override;
 
 private:
 	bool IsInRange(AActor* Target, float Radius);
@@ -54,18 +49,6 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	EEnemyState EnemyState = EEnemyState::EES_Patrol;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Montage")
-	UAnimMontage* FrontHittedMontage;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Montage")
-	UAnimMontage* BackHittedMontage;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Montage")
-	UAnimMontage* RightHittedMontage;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Montage")
-	UAnimMontage* LeftHittedMontage;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Widget")
 	UHealthBarComponent* HealthBarWidget;
 
@@ -76,8 +59,6 @@ private:
 
 	bool BisArrived = false;
 
-	UPROPERTY(EditDefaultsOnly)
-	UAnimMontage* DeathMontage;
 
 	UPROPERTY(EditDefaultsOnly)
 	float RemoveHealthWidget = 500.f;
@@ -95,9 +76,6 @@ private:
 	UPawnSensingComponent* PawnSensing;
 
 	UPROPERTY()
-	FVector AttackDirectTion;
-
-	UPROPERTY()
 	AAIController* EnenmyController;
 
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
@@ -108,5 +86,4 @@ private:
 
 public:
 	FORCEINLINE bool Get_BisDead() { return BisDead; }
-	FORCEINLINE void I_Set_AttackDirection(const FVector& AttackDirection) { AttackDirectTion = AttackDirection; }
 };

@@ -28,7 +28,6 @@ AEnemy::AEnemy()
 	PawnSensing->SightRadius = 400.f;
 
 	GetCharacterMovement()->bOrientRotationToMovement=true;
-	GetCharacterMovement()->MaxWalkSpeed = 175.f;
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
@@ -37,6 +36,7 @@ AEnemy::AEnemy()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+	GetCharacterMovement()->MaxWalkSpeed = 175.f;
 	if (PawnSensing)
 	{
 		PawnSensing->OnSeePawn.AddDynamic(this, &AEnemy::PawnSeen);
@@ -66,35 +66,6 @@ void AEnemy::BeginPlay()
 		//}
 		EnemyState = EEnemyState::EES_Waiting;
 		BisArrived = false;
-	}
-}
-
-UAnimMontage* AEnemy::Get_Correct_Montage(const FVector& AttackDirection)
-{
-	FVector Cross = FVector::CrossProduct(AttackDirection, GetActorForwardVector());
-
-	double Dot = FVector::DotProduct(AttackDirection, GetActorForwardVector());
-
-	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, FString::Printf(TEXT("Dot = %f"), Dot));
-	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, FString::Printf(TEXT("Cross.z = %f"), Cross.Z));
-	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, FString::Printf(TEXT("Cross.y = %f"), Cross.Y));
-	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, FString::Printf(TEXT("Cross.x = %f"), Cross.X));
-
-	if (Dot < 1 && Dot >0.2)
-	{
-		return BackHittedMontage;
-	}
-	else if (Dot > -1 && Dot < -0.3)
-	{
-		return FrontHittedMontage;
-	}
-	else if (Cross.Z>0)
-	{
-		return RightHittedMontage;
-	}
-	else
-	{
-		return LeftHittedMontage;
 	}
 }
 
@@ -135,6 +106,8 @@ void AEnemy::Tick(float DeltaTime)
 
 	if (Patrol && EnenmyController)
 	{
+		if (BisDead) return;
+
 		if (EnemyState == EEnemyState::EES_Chasing) {
 			MoveToTarget(Patrol);
 			if (!IsInRange(Patrol, RemoveHealthWidget))
@@ -177,18 +150,6 @@ void AEnemy::Tick(float DeltaTime)
 	}
 }
 
-void AEnemy::GetHit(const FVector_NetQuantize& ImpactPoint)
-{
-	
-}
-
-void AEnemy::I_GetAttackDirection(const FVector& AttackDirection)
-{
-	FVector Cross = FVector::CrossProduct(AttackDirection,GetActorForwardVector());
-
-	double Dot = FVector::DotProduct(AttackDirection, GetActorForwardVector());
-}
-
 void AEnemy::PawnSeen(APawn* Pawn)
 {
 	EnemyState = EEnemyState::EES_Chasing;
@@ -223,19 +184,15 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 		PlayAnimMontage(Get_Correct_Montage(AttackDirectTion));
 	}
 
-	if (AttributeComponent->Get_Health() == 0)
-	{
-		if (DeathMontage == nullptr) return 0;
-		
-		PlayAnimMontage(DeathMontage);
-		BisDead = true;
-
-		SetLifeSpan(5.f);
-
-		SetActorEnableCollision(false);
-	}
+	if (AttributeComponent->Get_Health() == 0) Die();
 
 	return DamageAmount;
+}
+
+void AEnemy::Die()
+{
+	Super::Die();
+	BisDead = true;
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

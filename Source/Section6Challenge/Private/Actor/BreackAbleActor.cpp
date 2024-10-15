@@ -34,8 +34,6 @@ void ABreackAbleActor::Spawn_ActorTimer_Finish()
 	Location.Z += 75.0f;
 
 	World->SpawnActor<ATreasure>(Treasure, Location, GetActorRotation());
-
-	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Cyan, TEXT("spawn actor"));
 }
 
 void ABreackAbleActor::Tick(float DeltaTime)
@@ -55,8 +53,3 @@ void ABreackAbleActor::GetHit(const FVector_NetQuantize& ImpactPoint)
 
 	GetWorldTimerManager().SetTimer(SpawnActorTimer,this,&ABreackAbleActor::Spawn_ActorTimer_Finish,SpawnWaitTime);
 }
-
-void ABreackAbleActor::I_GetAttackDirection(const FVector& AttackDirection)
-{
-}
-

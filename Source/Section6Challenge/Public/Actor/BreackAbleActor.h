@@ -23,8 +23,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void GetHit(const FVector_NetQuantize& ImpactPoint) override;
-
-	virtual void I_GetAttackDirection(const FVector& AttackDirection) override;
 protected:
 	virtual void BeginPlay() override;
 

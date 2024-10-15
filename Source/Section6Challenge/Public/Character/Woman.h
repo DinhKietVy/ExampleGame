@@ -3,9 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "BaseCharacter.h"
 #include "CharacterState.h"
-#include "Interface/HitInterface.h"
 #include "Woman.generated.h"
 
 class USpringArmComponent;
@@ -15,12 +14,11 @@ class UInputMappingContext;
 class UInputAction;
 class AItem;
 class ATreasure;
-class UAnimMontage;
 class ASword;
 struct FInputActionValue;
 
 UCLASS()
-class SECTION6CHALLENGE_API AWoman : public ACharacter, public IHitInterface
+class SECTION6CHALLENGE_API AWoman : public ABaseCharacter
 {
 	GENERATED_BODY()
 
@@ -28,13 +26,9 @@ public:
 	// Sets default values for this character's properties
 	AWoman();
 
-	virtual void I_Set_AttackDirection(const FVector& AttackDirection) override;
-
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void GetHit(const FVector_NetQuantize& ImpactPoint) override;
-
-	virtual void I_GetAttackDirection(const FVector& AttackDirection) override;
 
 	UPROPERTY()
 	EActionState ActionState = EActionState::EAS_Unoccupied;
@@ -43,15 +37,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montage")
 	TArray<UAnimMontage*> Attack_AM;
-
-
-	bool bCanCombo = false;
-
-	bool IsAttack = false;
-
-	bool bIsAction = false;
-
-	bool bCanTrace = false;
 
 	UPROPERTY()
 	ASword* Sword;
@@ -82,7 +67,7 @@ private:
 
 	void ETrigger();
 
-	void Attack();
+	void Attack() override;
 
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComponent;

@@ -25,6 +25,4 @@ public:
 	virtual void I_Set_AttackDirection(const FVector& AttackDirection) = 0;
 
 	virtual void GetHit(const FVector_NetQuantize& ImpactPoint) = 0;
-	
-	virtual void I_GetAttackDirection(const FVector& AttackDirection) = 0;
 };

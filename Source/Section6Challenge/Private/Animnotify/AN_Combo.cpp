@@ -12,15 +12,12 @@ void UAN_Combo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Anim
 
 	Character = Cast<AWoman>(MeshComp->GetOwner());
 
-	if (Character)
+	if (Character && Character->bCanCombo)
 	{
 		int Number = Character->Attack_AM.Num();
 		Character->AttackIndex = (Character->AttackIndex + 1) % Number;
-		if (Character->bCanCombo)
-		{
-			Character->bCanCombo = false;
-			Character->PlayAnimMontage(Character->Attack_AM[Character->AttackIndex]);
-		}
+		Character->bCanCombo = false;
+		Character->PlayAnimMontage(Character->Attack_AM[Character->AttackIndex]);
 
 	}
 }

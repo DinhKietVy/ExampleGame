@@ -2,16 +2,16 @@
 
 
 #include "Animnotify/StartTrace.h"
-#include "Character/Woman.h"
+#include "Character/BaseCharacter.h"
 
 void UStartTrace::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
 	Super::Notify(MeshComp,  Animation,  EventReference);
 	if (MeshComp == nullptr) return;
 
-	Woman = Cast<AWoman>(MeshComp->GetOwner());
+	Character = Cast<ABaseCharacter>(MeshComp->GetOwner());
 
-	if (Woman == nullptr) return;
+	if (Character == nullptr) return;
 
-	Woman->bCanTrace = true;
+	Character->bCanTrace = true;
 }
