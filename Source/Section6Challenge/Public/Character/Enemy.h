@@ -73,7 +73,7 @@ private:
 	int PatrolIndex = 0;
 
 	UPROPERTY(EditAnywhere)
-	float AttackRadius = 130.f;
+	float AttackRadius = 150.f;
 
 	UPROPERTY(VisibleAnywhere)
 	AActor* Causer;

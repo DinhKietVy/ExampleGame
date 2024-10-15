@@ -78,7 +78,7 @@ bool AEnemy::IsInRange(AActor* Target, float Radius)
 
 void AEnemy::PatrolWatingFinish()
 {
-	if (EnemyState == EEnemyState::EES_Chasing) return;
+	if (EnemyState == EEnemyState::EES_Chasing || EnemyState == EEnemyState::EEC_Attacking) return;
 
 	EnemyState = EEnemyState::EES_Patrol;
 }
