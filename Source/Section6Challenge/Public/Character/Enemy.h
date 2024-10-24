@@ -51,6 +51,8 @@ private:
 
 	void Guarding();
 
+	void OutOfSight();
+
 private:
 	UPROPERTY()
 	FTimerHandle PatrolTimer;

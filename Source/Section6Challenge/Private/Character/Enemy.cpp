@@ -78,7 +78,7 @@ bool AEnemy::IsInRange(AActor* Target, float Radius)
 
 void AEnemy::PatrolWatingFinish()
 {
-	if (EnemyState == EEnemyState::EES_Chasing || EnemyState == EEnemyState::EEC_Attacking) return;
+	if (EnemyState == EEnemyState::EES_Chasing) return;
 
 	EnemyState = EEnemyState::EES_Patrol;
 }
@@ -106,14 +106,16 @@ void AEnemy::RemoveHealthBar()
 
 void AEnemy::SeePlayer()
 {
-	if (EnemyState == EEnemyState::EES_Chasing)
+	if (EnemyState == EEnemyState::EES_Chasing && Patrol->ActorHasTag(FName("Woman")))
 	{
+		HealthBarWidget->SetVisibility(true);
 		FAIMoveRequest MoveRequest;
 		MoveRequest.SetGoalActor(Patrol);
 		MoveRequest.SetAcceptanceRadius(60.f);
 		EnenmyController->MoveTo(MoveRequest);
 		if (IsInRange(Patrol, AttackRadius))
 		{
+			GetWorldTimerManager().ClearTimer(PatrolTimer);
 			Attack();
 		}
 		if (!IsInRange(Patrol, RemoveHealthWidgetRadius))
@@ -150,6 +152,14 @@ void AEnemy::Guarding()
 	}
 }
 
+void AEnemy::OutOfSight()
+{
+	if (EnemyState == EEnemyState::EEC_Attacking && Patrol->ActorHasTag(FName("Woman")) && !IsInRange(Patrol,AttackRadius))
+	{
+		EnemyState = EEnemyState::EES_Chasing;
+	}
+}
+
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -161,6 +171,8 @@ void AEnemy::Tick(float DeltaTime)
 		if (BisDead) return;
 
 		SeePlayer();
+
+		OutOfSight();
 
 		Guarding();
 	}
