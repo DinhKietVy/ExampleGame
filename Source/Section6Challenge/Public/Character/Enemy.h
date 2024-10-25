@@ -55,6 +55,8 @@ private:
 
 	void OutOfAttackRange();
 
+	void MakeMovementStop();
+
 private:
 	UPROPERTY()
 	FTimerHandle PatrolTimer;
@@ -113,4 +115,6 @@ private:
 
 public:
 	FORCEINLINE bool Get_BisDead() { return BisDead; }
+	FORCEINLINE AAIController* Get_AIController() { return EnenmyController; }
+	FORCEINLINE AActor* Get_Patrol() { return Patrol; }
 };

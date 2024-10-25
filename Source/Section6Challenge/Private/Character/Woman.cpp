@@ -144,7 +144,6 @@ void AWoman::Arm()
 	{
 		PlayAnimMontage(AM_Arm);
 		CharacterState = ECharacterState::ESC_EquippedOneHanedWeapon;
-		bIsAction = true;
 		//Sword->Equip(GetMesh(), FName("Right_HandSocket"));
 	}
 
@@ -156,7 +155,6 @@ void AWoman::DisArm()
 	{
 		PlayAnimMontage(AM_DisArm);
 		CharacterState = ECharacterState::ECS_Unequipped;
-		bIsAction = true;
 		//Sword->Equip(GetMesh(), FName("BackSocket"));
 	}
 

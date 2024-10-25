@@ -13,9 +13,9 @@ void UAN_Equip::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Anim
 
 	Character = Cast<AWoman>(MeshComp->GetOwner());
 
-	Sword = Character->Sword;
-
 	if (Sword == nullptr) return;
+
+	Sword = Character->Sword;
 
 	if(Character->Get_Enum_CharacterState() == ECharacterState::ESC_EquippedOneHanedWeapon)
 		Sword->Equip(MeshComp, FName("Right_HandSocket"),nullptr,nullptr);

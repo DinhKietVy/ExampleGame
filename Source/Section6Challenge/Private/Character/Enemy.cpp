@@ -10,7 +10,6 @@
 #include "Navigation/PathFollowingComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-// Sets default values
 AEnemy::AEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -167,6 +166,14 @@ void AEnemy::OutOfAttackRange()
 		
 }
 
+void AEnemy::MakeMovementStop()
+{
+	if (bIsAction)
+	{
+		EnenmyController->StopMovement();
+	}
+}
+
 AActor* AEnemy::GetPlayerController()
 {
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
@@ -188,6 +195,8 @@ void AEnemy::Tick(float DeltaTime)
 		OutOfAttackRange();
 
 		Guarding();
+
+		MakeMovementStop();
 	}
 }
 

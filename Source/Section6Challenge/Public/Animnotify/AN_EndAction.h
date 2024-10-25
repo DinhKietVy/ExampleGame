@@ -7,6 +7,8 @@
 #include "AN_EndAction.generated.h"
 
 class AWoman;
+class ABaseCharacter;
+class AEnemy;
 
 UCLASS()
 class SECTION6CHALLENGE_API UAN_EndAction : public UAnimNotify
@@ -17,5 +19,8 @@ private:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 
 	UPROPERTY()
-	AWoman* Character;
+	ABaseCharacter* Character;
+
+	UPROPERTY()
+	AEnemy* Enemy;
 };
