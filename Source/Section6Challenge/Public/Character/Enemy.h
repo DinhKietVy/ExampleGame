@@ -43,6 +43,8 @@ private:
 
 	void PatrolWatingFinish();
 
+	void AttackWaitingFinish();
+
 	void MoveToTarget(AActor* Target);
 
 	void RemoveHealthBar();
@@ -51,11 +53,14 @@ private:
 
 	void Guarding();
 
-	void OutOfSight();
+	void OutOfAttackRange();
 
 private:
 	UPROPERTY()
 	FTimerHandle PatrolTimer;
+
+	UPROPERTY()
+	FTimerHandle AttackTimer;
 
 	UPROPERTY(VisibleAnywhere)
 	EEnemyState EnemyState = EEnemyState::EES_Patrol;
@@ -83,6 +88,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	float AttackRadius = 150.f;
 
+	UPROPERTY(EditAnywhere)
+	float AttackingSpeed = 2.f;
+
 	UPROPERTY(VisibleAnywhere)
 	AActor* Causer;
 
@@ -94,6 +102,8 @@ private:
 
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	AActor* Patrol;
+
+	AActor* GetPlayerController();
 
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	TArray<AActor*> Patrols;

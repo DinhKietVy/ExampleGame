@@ -78,9 +78,12 @@ bool AEnemy::IsInRange(AActor* Target, float Radius)
 
 void AEnemy::PatrolWatingFinish()
 {
-	if (EnemyState == EEnemyState::EES_Chasing) return;
-
 	EnemyState = EEnemyState::EES_Patrol;
+}
+
+void AEnemy::AttackWaitingFinish()
+{
+	Attack();
 }
 
 void AEnemy::MoveToTarget(AActor* Target)
@@ -99,6 +102,7 @@ void AEnemy::RemoveHealthBar()
 		{
 			Causer = nullptr;
 			if (HealthBarWidget == nullptr) return;
+
 			HealthBarWidget->SetVisibility(false);
 		}
 	}
@@ -108,6 +112,7 @@ void AEnemy::SeePlayer()
 {
 	if (EnemyState == EEnemyState::EES_Chasing && Patrol->ActorHasTag(FName("Woman")))
 	{
+		Causer = GetPlayerController();
 		HealthBarWidget->SetVisibility(true);
 		FAIMoveRequest MoveRequest;
 		MoveRequest.SetGoalActor(Patrol);
@@ -152,12 +157,20 @@ void AEnemy::Guarding()
 	}
 }
 
-void AEnemy::OutOfSight()
+void AEnemy::OutOfAttackRange()
 {
-	if (EnemyState == EEnemyState::EEC_Attacking && Patrol->ActorHasTag(FName("Woman")) && !IsInRange(Patrol,AttackRadius))
+	if (EnemyState == EEnemyState::EEC_Attacking && Patrol->ActorHasTag(FName("Woman")) && !IsInRange(Patrol, AttackRadius))
 	{
 		EnemyState = EEnemyState::EES_Chasing;
+		GetWorldTimerManager().ClearTimer(AttackTimer);
 	}
+		
+}
+
+AActor* AEnemy::GetPlayerController()
+{
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	return PlayerController->GetPawn();
 }
 
 void AEnemy::Tick(float DeltaTime)
@@ -172,7 +185,7 @@ void AEnemy::Tick(float DeltaTime)
 
 		SeePlayer();
 
-		OutOfSight();
+		OutOfAttackRange();
 
 		Guarding();
 	}
@@ -181,10 +194,9 @@ void AEnemy::Tick(float DeltaTime)
 void AEnemy::PawnSeen(APawn* Pawn)
 {
 	if (EnemyState == EEnemyState::EEC_Attacking) return;
+	GetWorldTimerManager().ClearTimer(PatrolTimer);
 	EnemyState = EEnemyState::EES_Chasing;
-	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	AActor* PlayerStart = PlayerController->GetPawn();
-	Patrol = PlayerStart;
+	Patrol = GetPlayerController();
 	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 }
 
@@ -232,6 +244,8 @@ void AEnemy::Attack()
 	if (AttackMontage == nullptr) return;
 
 	PlayAnimMontage(AttackMontage);
+
+	GetWorldTimerManager().SetTimer(AttackTimer,this,&AEnemy::AttackWaitingFinish,AttackingSpeed);
 
 	EnemyState = EEnemyState::EEC_Attacking;
 }
