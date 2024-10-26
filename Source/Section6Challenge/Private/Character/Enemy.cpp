@@ -9,6 +9,7 @@
 #include "AIController.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AEnemy::AEnemy()
 {
@@ -174,6 +175,15 @@ void AEnemy::MakeMovementStop()
 	}
 }
 
+bool AEnemy::Isbehind()
+{
+	if (Causer == nullptr) return true;
+
+	CauserDirection = UKismetMathLibrary::GetDirectionUnitVector(Causer->GetActorLocation(),GetActorLocation());
+	CheckBehind = FVector::DotProduct(GetActorForwardVector(),CauserDirection);
+	return CheckBehind>0.5;
+}
+
 AActor* AEnemy::GetPlayerController()
 {
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
@@ -197,6 +207,8 @@ void AEnemy::Tick(float DeltaTime)
 		Guarding();
 
 		MakeMovementStop();
+
+		Isbehind();
 	}
 }
 
@@ -250,7 +262,7 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 
 void AEnemy::Attack()
 {
-	if (AttackMontage == nullptr) return;
+	if (AttackMontage == nullptr || Isbehind()) return;
 
 	PlayAnimMontage(AttackMontage);
 

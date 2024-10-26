@@ -57,6 +57,10 @@ private:
 
 	void MakeMovementStop();
 
+	bool Isbehind();
+
+	AActor* GetPlayerController();
+
 private:
 	UPROPERTY()
 	FTimerHandle PatrolTimer;
@@ -77,7 +81,6 @@ private:
 
 	bool BisArrived = false;
 
-
 	UPROPERTY(EditDefaultsOnly)
 	float RemoveHealthWidgetRadius = 500.f;
 
@@ -94,6 +97,9 @@ private:
 	float AttackingSpeed = 2.f;
 
 	UPROPERTY(VisibleAnywhere)
+	float CheckBehind;
+
+	UPROPERTY(VisibleAnywhere)
 	AActor* Causer;
 
 	UPROPERTY(VisibleAnywhere)
@@ -105,13 +111,14 @@ private:
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	AActor* Patrol;
 
-	AActor* GetPlayerController();
-
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	TArray<AActor*> Patrols;
 
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* AttackMontage;
+
+	UPROPERTY()
+	FVector CauserDirection;
 
 public:
 	FORCEINLINE bool Get_BisDead() { return BisDead; }

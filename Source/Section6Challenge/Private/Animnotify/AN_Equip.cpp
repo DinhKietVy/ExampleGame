@@ -13,7 +13,7 @@ void UAN_Equip::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Anim
 
 	Character = Cast<AWoman>(MeshComp->GetOwner());
 
-	if (Sword == nullptr) return;
+	if (Character->Sword == nullptr) return;
 
 	Sword = Character->Sword;
 
