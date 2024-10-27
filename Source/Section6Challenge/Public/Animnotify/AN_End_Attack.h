@@ -8,6 +8,7 @@
 
 class AWoman;
 class ABaseCharacter;
+class AEnemy;
 
 UCLASS()
 class SECTION6CHALLENGE_API UAN_End_Attack : public UAnimNotify
@@ -16,6 +17,8 @@ class SECTION6CHALLENGE_API UAN_End_Attack : public UAnimNotify
 private:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 	AWoman* Woman;
+
+	AEnemy* Enemy;
 
 	ABaseCharacter* Character;
 

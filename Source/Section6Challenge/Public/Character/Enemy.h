@@ -133,4 +133,5 @@ public:
 	FORCEINLINE bool Get_BisDead() { return BisDead; }
 	FORCEINLINE AAIController* Get_AIController() { return EnenmyController; }
 	FORCEINLINE AActor* Get_Patrol() { return Patrol; }
+	FORCEINLINE ASword* Get_Sword() { return Sword; }
 };

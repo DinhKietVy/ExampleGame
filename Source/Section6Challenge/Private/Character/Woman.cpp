@@ -25,6 +25,7 @@ AWoman::AWoman()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 550.0f, 0.0);
+	GetMesh()->SetGenerateOverlapEvents(true);
 }
 
 void AWoman::BeginPlay()
@@ -41,8 +42,6 @@ void AWoman::Tick(float DeltaTime)
 
 void AWoman::GetHit(const FVector_NetQuantize& ImpactPoint)
 {
-	DrawDebugSphere(GetWorld(), ImpactPoint, 15.0f, 12, FColor::Red);
-
 	if (HittedMontage == nullptr) return;
 
 	PlayAnimMontage(HittedMontage);
