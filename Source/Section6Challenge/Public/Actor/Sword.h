@@ -7,6 +7,7 @@
 #include "Sword.generated.h"
 
 class AWoman;
+class ABaseCharacter;
 class UStartTrace;
 class UBoxComponent;
 class USceneComponent;
@@ -41,7 +42,7 @@ private:
 	USceneComponent* EndTrace;
 
 	UPROPERTY()
-	AWoman* Woman;
+	ABaseCharacter* Character;
 
 	UPROPERTY(EditDefaultsOnly)
 	UStartTrace* Trace;
@@ -56,6 +57,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
+
+	UPROPERTY(EditAnywhere)
+	bool bShowBoxDebug = true;
 
 public:
 	FORCEINLINE TArray<AActor*>* Get_ActorHitted() { return ActorHittedPointer; }

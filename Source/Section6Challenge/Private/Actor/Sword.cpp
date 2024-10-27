@@ -3,6 +3,7 @@
 
 #include "Actor/Sword.h"
 #include "Character/Woman.h"
+#include "Character/BaseCharacter.h"
 #include "Actor/Item.h"
 #include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
@@ -44,13 +45,13 @@ void ASword::Equip(USceneComponent* Parent, FName SocketName,AActor* NewOwner, A
 		SetInstigator(NewInstigator);
 	}
 
-	Woman = Cast<AWoman>(Parent->GetOwner());
+	Character = Cast<ABaseCharacter>(Parent->GetOwner());
 	FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	Item->AttachToComponent(Parent, TransformRules, SocketName);
 
-	if (ActorIgnore.Contains(Woman)) return;
+	if (ActorIgnore.Contains(Character)) return;
 
-	ActorIgnore.Add(Woman);
+	ActorIgnore.Add(Character);
 
 	BienDo = 0;
 	time = 0;
@@ -65,7 +66,7 @@ void ASword::Equip(USceneComponent* Parent, FName SocketName,AActor* NewOwner, A
 
 void ASword::OnBoxOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (Woman == nullptr || Woman->bCanTrace == false) return;
+	if (Character == nullptr || Character->bCanTrace == false) return;
 
 	const FVector Start = StartTrace->GetComponentLocation();
 
@@ -77,7 +78,7 @@ void ASword::OnBoxOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* O
 		FVector(2.5f,2.5f,2.5f),
 		StartTrace->GetComponentRotation(),
 		ETraceTypeQuery::TraceTypeQuery1,false,
-		ActorIgnore,EDrawDebugTrace::ForDuration, BoxHit, true);
+		ActorIgnore,bShowBoxDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None, BoxHit, true);
 
 	if (BoxHit.GetActor())
 	{

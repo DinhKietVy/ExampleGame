@@ -13,6 +13,7 @@ class UAttributeComponent;
 class UPawnSensingComponent;
 class AAIController;
 class UAnimMontage;
+class ASword;
 
 UCLASS()
 class SECTION6CHALLENGE_API AEnemy : public ABaseCharacter
@@ -45,7 +46,7 @@ private:
 
 	void AttackWaitingFinish();
 
-	void MoveToTarget(AActor* Target);
+	void MoveToTarget(AActor* Target, float Radius);
 
 	void RemoveHealthBar();
 
@@ -80,6 +81,9 @@ private:
 	bool BisDead = false;
 
 	bool BisArrived = false;
+
+	UPROPERTY(VisibleAnywhere)
+	bool BisAttackWaitingFinish = true;
 
 	UPROPERTY(EditDefaultsOnly)
 	float RemoveHealthWidgetRadius = 500.f;
@@ -119,6 +123,11 @@ private:
 
 	UPROPERTY()
 	FVector CauserDirection;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TSubclassOf<ASword> Spawn_Sword;
+
+	ASword* Sword;
 
 public:
 	FORCEINLINE bool Get_BisDead() { return BisDead; }

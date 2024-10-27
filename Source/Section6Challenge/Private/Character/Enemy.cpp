@@ -10,6 +10,7 @@
 #include "Navigation/PathFollowingComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Actor/Sword.h"
 
 AEnemy::AEnemy()
 {
@@ -36,6 +37,13 @@ AEnemy::AEnemy()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+	if (Spawn_Sword)
+	{
+		Sword = GetWorld()->SpawnActor<ASword>(Spawn_Sword,GetActorLocation(),GetActorRotation());
+		
+		Sword->Equip(GetMesh(), FName("RightHandSocket"), this, this);
+	}
+
 	GetCharacterMovement()->MaxWalkSpeed = 175.f;
 	if (PawnSensing)
 	{
@@ -57,7 +65,7 @@ void AEnemy::BeginPlay()
 	
 	if (EnenmyController && Patrol)
 	{
-		MoveToTarget(Patrol);
+		MoveToTarget(Patrol,15.f);
 		//TArray<FNavPathPoint>& PathPoint = NavPatch->GetPathPoints();
 		//for (auto& Point : PathPoint)
 		//{
@@ -83,14 +91,14 @@ void AEnemy::PatrolWatingFinish()
 
 void AEnemy::AttackWaitingFinish()
 {
-	Attack();
+	BisAttackWaitingFinish = true;
 }
 
-void AEnemy::MoveToTarget(AActor* Target)
+void AEnemy::MoveToTarget(AActor* Target, float Radius)
 {
 	FAIMoveRequest MoveRequest;
 	MoveRequest.SetGoalActor(Target);
-	MoveRequest.SetAcceptanceRadius(15.f);
+	MoveRequest.SetAcceptanceRadius(Radius);
 	EnenmyController->MoveTo(MoveRequest);
 }
 
@@ -110,17 +118,18 @@ void AEnemy::RemoveHealthBar()
 
 void AEnemy::SeePlayer()
 {
-	if (EnemyState == EEnemyState::EES_Chasing && Patrol->ActorHasTag(FName("Woman")))
+	if ((EnemyState == EEnemyState::EES_Chasing && Patrol->ActorHasTag(FName("Woman"))) || EnemyState == EEnemyState::EEC_Attacking)
 	{
+		GetWorldTimerManager().ClearTimer(PatrolTimer);
 		Causer = GetPlayerController();
 		HealthBarWidget->SetVisibility(true);
-		FAIMoveRequest MoveRequest;
-		MoveRequest.SetGoalActor(Patrol);
-		MoveRequest.SetAcceptanceRadius(60.f);
-		EnenmyController->MoveTo(MoveRequest);
-		if (IsInRange(Patrol, AttackRadius))
+		if (!IsInRange(Causer, AttackRadius))
 		{
-			GetWorldTimerManager().ClearTimer(PatrolTimer);
+			MoveToTarget(Patrol, 75.f);
+		}
+		if (IsInRange(Causer, AttackRadius))
+		{
+			EnenmyController->StopMovement();
 			Attack();
 		}
 		if (!IsInRange(Patrol, RemoveHealthWidgetRadius))
@@ -128,7 +137,7 @@ void AEnemy::SeePlayer()
 			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("lose interesting"));
 			GetCharacterMovement()->MaxWalkSpeed = 175.f;
 			Patrol = Patrols[PatrolIndex];
-			MoveToTarget(Patrol);
+			MoveToTarget(Patrol,15.f);
 			BisArrived = false;
 			EnemyState = EEnemyState::EES_Patrol;
 		}
@@ -150,7 +159,7 @@ void AEnemy::Guarding()
 			PatrolIndex = (PatrolIndex + 1) % Patrols.Num();
 			AActor* Target = Patrols[PatrolIndex];
 			Patrol = Target;
-			MoveToTarget(Patrol);
+			MoveToTarget(Patrol,15.f);
 			EnemyState = EEnemyState::EES_Waiting;
 			BisArrived = false;
 		}
@@ -159,10 +168,11 @@ void AEnemy::Guarding()
 
 void AEnemy::OutOfAttackRange()
 {
-	if (EnemyState == EEnemyState::EEC_Attacking && Patrol->ActorHasTag(FName("Woman")) && !IsInRange(Patrol, AttackRadius))
+	if (EnemyState == EEnemyState::EEC_Attacking && Patrol->ActorHasTag(FName("Woman")) && !IsInRange(Patrol, AttackRadius+50.f))
 	{
 		EnemyState = EEnemyState::EES_Chasing;
 		GetWorldTimerManager().ClearTimer(AttackTimer);
+		BisAttackWaitingFinish = true;
 	}
 		
 }
@@ -200,13 +210,13 @@ void AEnemy::Tick(float DeltaTime)
 	{
 		if (BisDead) return;
 
+		MakeMovementStop();
+
 		SeePlayer();
 
 		OutOfAttackRange();
 
 		Guarding();
-
-		MakeMovementStop();
 
 		Isbehind();
 	}
@@ -262,13 +272,14 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 
 void AEnemy::Attack()
 {
-	if (AttackMontage == nullptr || Isbehind()) return;
-
+	if (AttackMontage == nullptr || Isbehind() || bIsAction || !BisAttackWaitingFinish) return;
+	BisAttackWaitingFinish = false;
 	PlayAnimMontage(AttackMontage);
-
-	GetWorldTimerManager().SetTimer(AttackTimer,this,&AEnemy::AttackWaitingFinish,AttackingSpeed);
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan,TEXT("Attack"));
 
 	EnemyState = EEnemyState::EEC_Attacking;
+
+	GetWorldTimerManager().SetTimer(AttackTimer,this,&AEnemy::AttackWaitingFinish,AttackingSpeed);
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
