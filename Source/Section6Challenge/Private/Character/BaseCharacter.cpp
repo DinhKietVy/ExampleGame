@@ -38,7 +38,7 @@ void ABaseCharacter::Tick(float DeltaTime)
 
 }
 
-void ABaseCharacter::GetHit(const FVector_NetQuantize& ImpactPoint)
+void ABaseCharacter::GetHit(const FVector_NetQuantize& ImpactPoint, AActor* Hitter)
 {
 }
 
@@ -58,11 +58,11 @@ UAnimMontage* ABaseCharacter::Get_Correct_Montage(const FVector& AttackDirection
 	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, FString::Printf(TEXT("Cross.y = %f"), Cross.Y));
 	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, FString::Printf(TEXT("Cross.x = %f"), Cross.X));
 
-	if (Dot < 1 && Dot >0.2)
+	if (Dot < 1 && Dot > 0.5)
 	{
 		return BackHittedMontage;
 	}
-	else if (Dot > -1 && Dot < -0.3)
+	else if (Dot > -1 && Dot < -0.5)
 	{
 		return FrontHittedMontage;
 	}

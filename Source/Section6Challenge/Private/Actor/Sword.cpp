@@ -86,11 +86,11 @@ void ASword::OnBoxOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* O
 
 		ActorHittedPointer->Add(BoxHit.GetActor());
 		const FVector AttackDirection = 
-			UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), BoxHit.GetActor()->GetActorLocation());
+			UKismetMathLibrary::GetDirectionUnitVector(GetOwner()->GetActorLocation(), BoxHit.GetActor()->GetActorLocation());
 		IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor());
 		if (HitInterface)
 		{
-			HitInterface->GetHit(BoxHit.ImpactPoint);
+			HitInterface->GetHit(BoxHit.ImpactPoint,GetOwner());
 			HitInterface->I_Set_AttackDirection(AttackDirection);
 		}
 		if (auto temp = Cast<ABreackAbleActor>(BoxHit.GetActor()))

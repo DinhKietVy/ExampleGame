@@ -24,5 +24,5 @@ class SECTION6CHALLENGE_API IHitInterface
 public:
 	virtual void I_Set_AttackDirection(const FVector& AttackDirection) = 0;
 
-	virtual void GetHit(const FVector_NetQuantize& ImpactPoint) = 0;
+	virtual void GetHit(const FVector_NetQuantize& ImpactPoint, AActor* Hitter) = 0;
 };

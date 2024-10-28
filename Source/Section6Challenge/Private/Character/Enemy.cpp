@@ -235,6 +235,7 @@ void AEnemy::Die()
 {
 	Super::Die();
 	BisDead = true;
+	Sword->SetLifeSpan(5.f);
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

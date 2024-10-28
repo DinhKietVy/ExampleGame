@@ -40,11 +40,13 @@ void AWoman::Tick(float DeltaTime)
 
 }
 
-void AWoman::GetHit(const FVector_NetQuantize& ImpactPoint)
+void AWoman::GetHit(const FVector_NetQuantize& ImpactPoint, AActor* Hitter)
 {
 	if (HittedMontage == nullptr) return;
 
 	PlayAnimMontage(HittedMontage);
+	//CharacterState = ECharacterState::ESC_Beaten;
+	ActionState = EActionState::EAS_Unoccupied;
 }
 
 void AWoman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -90,7 +92,7 @@ void AWoman::Looking(const FInputActionValue& Value)
 
 void AWoman::Moving(const FInputActionValue& Value)
 {
-	if (ActionState == EActionState::EAC_Attack || bIsAction) return;
+	if (ActionState == EActionState::EAC_Attack || bIsAction || CharacterState == ECharacterState::ESC_Beaten) return;
 
 	const FVector2D MoveValue = Value.Get<FVector2D>();
 	
@@ -105,7 +107,7 @@ void AWoman::Moving(const FInputActionValue& Value)
 
 void AWoman::Jump()
 {
-	if (ActionState == EActionState::EAC_Attack) return;
+	if (ActionState == EActionState::EAC_Attack || bIsAction || CharacterState == ECharacterState::ESC_Beaten) return;
 
 	Super::Jump();
 }
@@ -125,8 +127,6 @@ void AWoman::ETrigger()
 		bIsHaveWeapon = true;
 		
 	}
-
-
 	else if (CharacterState == ECharacterState::ESC_EquippedOneHanedWeapon && bIsHaveWeapon && ActionState == EActionState::EAS_Unoccupied)
 	{
 		DisArm();

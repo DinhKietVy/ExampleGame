@@ -23,4 +23,7 @@ private:
 
 	UPROPERTY()
 	AEnemy* Enemy;
+
+	UPROPERTY()
+	AWoman* Woman;
 };

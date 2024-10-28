@@ -42,7 +42,7 @@ void ABreackAbleActor::Tick(float DeltaTime)
 
 }
 
-void ABreackAbleActor::GetHit(const FVector_NetQuantize& ImpactPoint)
+void ABreackAbleActor::GetHit(const FVector_NetQuantize& ImpactPoint, AActor* Hitter)
 {
 	if (bIsBreak == true) return;
 

@@ -28,7 +28,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void GetHit(const FVector_NetQuantize& ImpactPoint) override;
+	virtual void GetHit(const FVector_NetQuantize& ImpactPoint, AActor* Hitter) override;
 
 	UPROPERTY()
 	EActionState ActionState = EActionState::EAS_Unoccupied;

@@ -18,7 +18,7 @@ public:
 	ABaseCharacter();
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void GetHit(const FVector_NetQuantize& ImpactPoint) override;
+	virtual void GetHit(const FVector_NetQuantize& ImpactPoint, AActor* Hitter) override;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
@@ -59,5 +59,5 @@ protected:
 	UAnimMontage* DeathMontage;
 
 public:
-	FORCEINLINE void I_Set_AttackDirection(const FVector& AttackDirection) { AttackDirectTion = AttackDirection; }
+	FORCEINLINE void I_Set_AttackDirection(const FVector& AttackDirection) override { AttackDirectTion = AttackDirection; }
 };
