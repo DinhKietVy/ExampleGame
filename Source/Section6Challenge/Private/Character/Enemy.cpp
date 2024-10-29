@@ -77,6 +77,26 @@ void AEnemy::BeginPlay()
 	}
 }
 
+void AEnemy::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	RemoveHealthBar();
+
+	if (Patrol && EnenmyController)
+	{
+		if (BisDead) return;
+
+		MakeMovementStop();
+
+		SeePlayer();
+
+		OutOfAttackRange();
+
+		Guarding();
+	}
+}
+
 bool AEnemy::IsInRange(AActor* Target, float Radius)
 {
 	const auto Distance = (Target->GetActorLocation() - GetActorLocation()).Size();
@@ -185,41 +205,10 @@ void AEnemy::MakeMovementStop()
 	}
 }
 
-bool AEnemy::Isbehind()
-{
-	if (Causer == nullptr) return true;
-
-	CauserDirection = UKismetMathLibrary::GetDirectionUnitVector(Causer->GetActorLocation(),GetActorLocation());
-	CheckBehind = FVector::DotProduct(GetActorForwardVector(),CauserDirection);
-	return CheckBehind>0.5;
-}
-
 AActor* AEnemy::GetPlayerController()
 {
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	return PlayerController->GetPawn();
-}
-
-void AEnemy::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	
-	RemoveHealthBar();
-
-	if (Patrol && EnenmyController)
-	{
-		if (BisDead) return;
-
-		MakeMovementStop();
-
-		SeePlayer();
-
-		OutOfAttackRange();
-
-		Guarding();
-
-		Isbehind();
-	}
 }
 
 void AEnemy::PawnSeen(APawn* Pawn)
@@ -236,6 +225,30 @@ void AEnemy::Die()
 	Super::Die();
 	BisDead = true;
 	Sword->SetLifeSpan(5.f);
+}
+
+FVector AEnemy::Get_Causer_Translation()
+{
+	if (Causer == nullptr) return FVector();
+
+	if (Causer)
+	{
+		FVector Distance = GetActorLocation() - Causer->GetActorLocation();
+		Distance *= WarpTargetDistance;
+		return Causer->GetActorLocation() + Distance;
+	}
+	return FVector();
+}
+
+FVector AEnemy::Get_Causer_Rotation()
+{
+	if (Causer == nullptr) return FVector();
+
+	if (Causer)
+	{
+		return Causer->GetActorLocation();
+	}
+	return FVector();
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -273,9 +286,12 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 
 void AEnemy::Attack()
 {
-	if (AttackMontage == nullptr || Isbehind() || bIsAction || !BisAttackWaitingFinish) return;
+	if (AttackMontages.Num() == 0 || bIsAction || !BisAttackWaitingFinish) return;
 	BisAttackWaitingFinish = false;
-	PlayAnimMontage(AttackMontage);
+
+	AttackIndex = FMath::RandRange(0, AttackMontages.Num()-1);
+	PlayAnimMontage(AttackMontages[AttackIndex]);
+
 	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan,TEXT("Attack"));
 
 	EnemyState = EEnemyState::EEC_Attacking;

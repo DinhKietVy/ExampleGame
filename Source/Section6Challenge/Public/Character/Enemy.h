@@ -39,6 +39,12 @@ protected:
 
 	void Die() override;
 
+	UFUNCTION(BlueprintCallable)
+	FVector Get_Causer_Translation();
+
+	UFUNCTION(BlueprintCallable)
+	FVector Get_Causer_Rotation();
+
 private:
 	bool IsInRange(AActor* Target, float Radius);
 
@@ -58,9 +64,12 @@ private:
 
 	void MakeMovementStop();
 
-	bool Isbehind();
-
 	AActor* GetPlayerController();
+
+protected:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	AActor* Causer;
 
 private:
 	UPROPERTY()
@@ -91,20 +100,20 @@ private:
 	UPROPERTY(EditAnywhere)
 	float PatrolRadius = 200.f;
 
+	UPROPERTY(EditAnywhere)
+	float WarpTargetDistance = 75.f;
+
 	UPROPERTY()
 	int PatrolIndex = 0;
+
+	UPROPERTY()
+	int AttackIndex = 0;
 
 	UPROPERTY(EditAnywhere)
 	float AttackRadius = 150.f;
 
 	UPROPERTY(EditAnywhere)
 	float AttackingSpeed = 2.f;
-
-	UPROPERTY(VisibleAnywhere)
-	float CheckBehind;
-
-	UPROPERTY(VisibleAnywhere)
-	AActor* Causer;
 
 	UPROPERTY(VisibleAnywhere)
 	UPawnSensingComponent* PawnSensing;
@@ -119,7 +128,7 @@ private:
 	TArray<AActor*> Patrols;
 
 	UPROPERTY(EditDefaultsOnly)
-	UAnimMontage* AttackMontage;
+	TArray<UAnimMontage*> AttackMontages;
 
 	UPROPERTY()
 	FVector CauserDirection;
