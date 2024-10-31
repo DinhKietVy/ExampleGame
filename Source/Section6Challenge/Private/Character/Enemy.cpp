@@ -3,22 +3,22 @@
 
 #include "Character/Enemy.h"
 #include "HUD/HealthBarComponent.h"
-#include "Component/AttributeComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Component/AttributeComponent.h"
 #include "Perception/PawnSensingComponent.h"
 #include "AIController.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Actor/Sword.h"
+#include "Character/Woman.h"
+#include "HUD/PlayerOverlay.h"
 
 AEnemy::AEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	HealthBarWidget = CreateDefaultSubobject<UHealthBarComponent>(TEXT("Health Bar"));
-
-	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attribute Component"));
 
 	PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("Pawn Sensing Component"));
 
@@ -233,7 +233,7 @@ FVector AEnemy::Get_Causer_Translation()
 
 	if (Causer)
 	{
-		FVector Distance = GetActorLocation() - Causer->GetActorLocation();
+		FVector Distance = (GetActorLocation() - Causer->GetActorLocation()).GetSafeNormal();
 		Distance *= WarpTargetDistance;
 		return Causer->GetActorLocation() + Distance;
 	}
@@ -279,7 +279,16 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 		EnemyState = EEnemyState::EES_Chasing;
 	}
 	
-	if (AttributeComponent->Get_Health() == 0) Die();
+	if (AttributeComponent->Get_Health() == 0) 
+	{
+		Die();
+		AWoman* Finisher = Cast<AWoman>(DamageCauser->GetOwner());
+		if (Finisher)
+		{
+			Finisher->Update_KillCount();
+			Finisher->Get_PlayerOverlay()->SetKillCount(Finisher->Get_KillCount());
+		}
+	}
 
 	return DamageAmount;
 }

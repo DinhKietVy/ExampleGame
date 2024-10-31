@@ -15,6 +15,7 @@ class UInputAction;
 class AItem;
 class ATreasure;
 class ASword;
+class UPlayerOverlay;
 struct FInputActionValue;
 
 UCLASS()
@@ -29,6 +30,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void GetHit(const FVector_NetQuantize& ImpactPoint, AActor* Hitter) override;
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	UPROPERTY()
 	EActionState ActionState = EActionState::EAS_Unoccupied;
@@ -69,6 +72,10 @@ private:
 
 	void Attack() override;
 
+	void InitiallizePlayeroverlay();
+
+private:
+
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComponent;
 
@@ -108,7 +115,13 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Montage")
 	UAnimMontage* HittedMontage;
 
+	UPROPERTY()
+	UPlayerOverlay* PlayerOverlay;
+
 	bool bIsHaveWeapon = false;
+
+	UPROPERTY(EditDefaultsOnly)
+	int KillCount = 0;
 
 public:
 	FORCEINLINE void Set_Mesh(AItem* Item) { OverlapItem = Item; }
@@ -117,4 +130,9 @@ public:
 
 	FORCEINLINE ASword* Get_Sword() { return Sword; }
 
+	FORCEINLINE UPlayerOverlay* Get_PlayerOverlay() { return PlayerOverlay; }
+
+	FORCEINLINE void Update_KillCount() { KillCount++; }
+
+	FORCEINLINE int Get_KillCount() { return KillCount; }
 };

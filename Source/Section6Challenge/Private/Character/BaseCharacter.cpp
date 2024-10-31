@@ -3,18 +3,19 @@
 
 #include "Character/BaseCharacter.h"
 #include "Animation/AnimMontage.h"
+#include "Component/AttributeComponent.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
+	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attribute Component"));
 }
 
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void ABaseCharacter::Attack()

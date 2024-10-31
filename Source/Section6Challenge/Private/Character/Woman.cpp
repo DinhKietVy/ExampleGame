@@ -5,9 +5,12 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Component/AttributeComponent.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "HUD/PlayerHUD.h"
+#include "HUD/PlayerOverlay.h"
 #include "Actor/Sword.h"
 
 
@@ -31,7 +34,12 @@ AWoman::AWoman()
 void AWoman::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	InitiallizePlayeroverlay();
+
+	PlayerOverlay->SetHealthBar(AttributeComponent->GetHelthPercent());
+	PlayerOverlay->SetStaminaBar(AttributeComponent->GetStaminaPercent());
+	PlayerOverlay->SetKillCount(KillCount);
 }
 
 void AWoman::Tick(float DeltaTime)
@@ -47,6 +55,16 @@ void AWoman::GetHit(const FVector_NetQuantize& ImpactPoint, AActor* Hitter)
 	PlayAnimMontage(HittedMontage);
 	//CharacterState = ECharacterState::ESC_Beaten;
 	ActionState = EActionState::EAS_Unoccupied;
+}
+
+float AWoman::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	if (AttributeComponent && PlayerOverlay)
+	{
+		AttributeComponent->ReceiveDamage(DamageAmount);
+		PlayerOverlay->SetHealthBar(AttributeComponent->GetHelthPercent());
+	}
+	return DamageAmount;
 }
 
 void AWoman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -174,5 +192,19 @@ void AWoman::Attack()
 
 		PlayAnimMontage(Attack_AM[AttackIndex]);
 		IsAttack = true;
+	}
+}
+
+void AWoman::InitiallizePlayeroverlay()
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+	{
+		APlayerHUD* PlayerHUD = Cast<APlayerHUD>(PlayerController->GetHUD());
+
+		if (PlayerHUD)
+		{
+			PlayerOverlay = PlayerHUD->GetPlayerOverlay();
+		}
 	}
 }

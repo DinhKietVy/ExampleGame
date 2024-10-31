@@ -84,9 +84,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Widget")
 	UHealthBarComponent* HealthBarWidget;
 
-	UPROPERTY(VisibleAnywhere)
-	UAttributeComponent* AttributeComponent;
-
 	bool BisDead = false;
 
 	bool BisArrived = false;

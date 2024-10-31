@@ -8,6 +8,7 @@
 #include "BaseCharacter.generated.h"
 
 class UAnimMontage;
+class UAttributeComponent;
 
 UCLASS()
 class SECTION6CHALLENGE_API ABaseCharacter : public ACharacter, public IHitInterface
@@ -57,6 +58,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* DeathMontage;
+
+	UPROPERTY(VisibleAnywhere)
+	UAttributeComponent* AttributeComponent;
 
 public:
 	FORCEINLINE void I_Set_AttackDirection(const FVector& AttackDirection) override { AttackDirectTion = AttackDirection; }

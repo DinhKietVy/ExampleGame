@@ -20,6 +20,8 @@ public:
 
 	float GetHelthPercent();
 
+	float GetStaminaPercent();
+
 	void ReceiveDamage(float Damage);
 
 	FORCEINLINE float Get_Health() { return Health; }
@@ -33,6 +35,12 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Attribute")
 	float MaxHealth = 100;
+
+	UPROPERTY(EditAnywhere, Category = "Attribute")
+	float Stamina = 100;
+
+	UPROPERTY(EditAnywhere, Category = "Attribute")
+	float MaxStamina = 100;
 
 	UPROPERTY(EditAnywhere, Category = "Attribute")
 	int32 Gold;
