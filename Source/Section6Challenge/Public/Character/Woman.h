@@ -56,6 +56,8 @@ private:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void Die() override;
+
 	void Arm();
 
 	void DisArm();
@@ -72,7 +74,17 @@ private:
 
 	void Attack() override;
 
+	void Dodge();
+
+	void QuitGame();
+
+	void Replay();
+
+	void PlayAgain();
+
 	void InitiallizePlayeroverlay();
+
+	bool bIsEnoughStamina(float StaminaCost);
 
 private:
 
@@ -103,6 +115,15 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Enhanced Input")
 	UInputAction* IA_Attack;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Enhanced Input")
+	UInputAction* IA_Dodge;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Enhanced Input")
+	UInputAction* IA_Replay;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Enhanced Input")
+	UInputAction* IA_QuitGame;
+
 	UPROPERTY(VisibleInstanceOnly)
 	AItem* OverlapItem;
 
@@ -115,13 +136,23 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Montage")
 	UAnimMontage* HittedMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Montage")
+	UAnimMontage* DodgeMontage;
+
 	UPROPERTY()
 	UPlayerOverlay* PlayerOverlay;
 
 	bool bIsHaveWeapon = false;
 
+	bool bIsDodging = false;
+
+	bool BisDead = false;
+
 	UPROPERTY(EditDefaultsOnly)
 	int KillCount = 0;
+
+	UPROPERTY(EditDefaultsOnly)
+	float DodgeStaminaCost = 20.f;
 
 public:
 	FORCEINLINE void Set_Mesh(AItem* Item) { OverlapItem = Item; }
@@ -135,4 +166,8 @@ public:
 	FORCEINLINE void Update_KillCount() { KillCount++; }
 
 	FORCEINLINE int Get_KillCount() { return KillCount; }
+
+	FORCEINLINE void Set_bIsDodging(bool SetDodging) { bIsDodging = SetDodging; }
+
+	FORCEINLINE bool Get_BisDead() { return BisDead; }
 };

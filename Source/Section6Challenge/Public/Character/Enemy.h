@@ -84,8 +84,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Widget")
 	UHealthBarComponent* HealthBarWidget;
 
-	bool BisDead = false;
-
 	bool BisArrived = false;
 
 	UPROPERTY(VisibleAnywhere)
@@ -132,6 +130,12 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	TSubclassOf<ASword> Spawn_Sword;
+
+	UPROPERTY(EditAnywhere, Category = "Spawn Enemy")
+	TSubclassOf<AEnemy> Spawn_Enemy1;
+
+	UPROPERTY(EditAnywhere, Category = "Spawn Enemy")
+	TSubclassOf<AEnemy> Spawn_Enemy2;
 
 	ASword* Sword;
 

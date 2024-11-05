@@ -42,6 +42,8 @@ void AEnemy::BeginPlay()
 		Sword = GetWorld()->SpawnActor<ASword>(Spawn_Sword,GetActorLocation(),GetActorRotation());
 		
 		Sword->Equip(GetMesh(), FName("RightHandSocket"), this, this);
+
+		Sword->SetOwner(this);
 	}
 
 	GetCharacterMovement()->MaxWalkSpeed = 175.f;
@@ -99,6 +101,8 @@ void AEnemy::Tick(float DeltaTime)
 
 bool AEnemy::IsInRange(AActor* Target, float Radius)
 {
+	if (Target == nullptr) return false;
+
 	const auto Distance = (Target->GetActorLocation() - GetActorLocation()).Size();
 
 	return Distance <= Radius;
@@ -141,6 +145,8 @@ void AEnemy::SeePlayer()
 	if ((EnemyState == EEnemyState::EES_Chasing && Patrol->ActorHasTag(FName("Woman"))) || EnemyState == EEnemyState::EEC_Attacking)
 	{
 		GetWorldTimerManager().ClearTimer(PatrolTimer);
+		if (Causer == nullptr) return;
+
 		Causer = GetPlayerController();
 		HealthBarWidget->SetVisibility(true);
 		if (!IsInRange(Causer, AttackRadius))
@@ -156,8 +162,11 @@ void AEnemy::SeePlayer()
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("lose interesting"));
 			GetCharacterMovement()->MaxWalkSpeed = 175.f;
-			Patrol = Patrols[PatrolIndex];
-			MoveToTarget(Patrol,15.f);
+			if (Patrols.Num() > 0)
+			{
+				Patrol = Patrols[PatrolIndex];
+				MoveToTarget(Patrol, 15.f);
+			}
 			BisArrived = false;
 			EnemyState = EEnemyState::EES_Patrol;
 		}
@@ -194,7 +203,6 @@ void AEnemy::OutOfAttackRange()
 		GetWorldTimerManager().ClearTimer(AttackTimer);
 		BisAttackWaitingFinish = true;
 	}
-		
 }
 
 void AEnemy::MakeMovementStop()
@@ -216,6 +224,7 @@ void AEnemy::PawnSeen(APawn* Pawn)
 	if (EnemyState == EEnemyState::EEC_Attacking) return;
 	GetWorldTimerManager().ClearTimer(PatrolTimer);
 	EnemyState = EEnemyState::EES_Chasing;
+	Causer = GetPlayerController();
 	Patrol = GetPlayerController();
 	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 }
@@ -225,6 +234,17 @@ void AEnemy::Die()
 	Super::Die();
 	BisDead = true;
 	Sword->SetLifeSpan(5.f);
+
+	if (Spawn_Enemy1 && Spawn_Enemy2)
+	{
+		FVector Location = GetActorLocation();
+		Location.X += 50.f;
+		AEnemy* EnemyTemp1 = GetWorld()->SpawnActor<AEnemy>(Spawn_Enemy1, Location, GetActorRotation());
+		//EnemyTemp1->MoveToTarget(Causer, 75.f);
+		Location.X += 50.f;
+		AEnemy* EnemyTemp2 = GetWorld()->SpawnActor<AEnemy>(Spawn_Enemy2, Location, GetActorRotation());
+		//EnemyTemp2->MoveToTarget(Causer, 75.f);
+	}
 }
 
 FVector AEnemy::Get_Causer_Translation()
@@ -253,7 +273,7 @@ FVector AEnemy::Get_Causer_Rotation()
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if (BisDead) return 0;
+	if (BisDead || DamageCauser->GetOwner()->ActorHasTag(FName("Enemy"))) return 0;
 
 	Causer = EventInstigator->GetPawn();
 

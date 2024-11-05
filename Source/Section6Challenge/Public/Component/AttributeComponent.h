@@ -24,7 +24,12 @@ public:
 
 	void ReceiveDamage(float Damage);
 
+	void ReceiveStaminaCost(float StaminaCost);
+
+	void RegenStamina(float DeltaTime);
+
 	FORCEINLINE float Get_Health() { return Health; }
+	FORCEINLINE float Get_Stamina() { return Stamina; }
 protected:
 
 	virtual void BeginPlay() override;
@@ -41,6 +46,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Attribute")
 	float MaxStamina = 100;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Attribute")
+	float StaminaRegenRate = 5.f;
 
 	UPROPERTY(EditAnywhere, Category = "Attribute")
 	int32 Gold;

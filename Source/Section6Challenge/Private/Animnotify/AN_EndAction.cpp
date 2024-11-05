@@ -27,7 +27,9 @@ void UAN_EndAction::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* 
 
 	if (Woman)
 	{
+		bool SetDodging = false;
 		Woman->ActionState = EActionState::EAS_Unoccupied;
+		Woman->Set_bIsDodging(SetDodging);
 	}
 
 	if (Enemy)

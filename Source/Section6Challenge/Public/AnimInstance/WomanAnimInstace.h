@@ -34,6 +34,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	ECharacterState CharacterState;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool BisDead = false;
 private:
 
 	UPROPERTY()

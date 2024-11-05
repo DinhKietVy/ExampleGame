@@ -33,6 +33,16 @@ void UAttributeComponent::ReceiveDamage(float Damage)
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 }
 
+void UAttributeComponent::ReceiveStaminaCost(float StaminaCost)
+{
+	Stamina = FMath::Clamp(Stamina - StaminaCost, 0.f, MaxStamina);
+}
+
+void UAttributeComponent::RegenStamina(float DeltaTime)
+{
+	Stamina = FMath::Clamp(Stamina + DeltaTime * StaminaRegenRate, 0, MaxStamina);
+}
+
 
 void UAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {

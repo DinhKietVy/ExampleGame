@@ -9,6 +9,8 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "HUD/PlayerHUD.h"
 #include "HUD/PlayerOverlay.h"
 #include "Actor/Sword.h"
@@ -16,7 +18,7 @@
 
 AWoman::AWoman()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 
@@ -29,6 +31,8 @@ AWoman::AWoman()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 550.0f, 0.0);
 	GetMesh()->SetGenerateOverlapEvents(true);
+
+	bUseControllerRotationYaw = false;
 }
 
 void AWoman::BeginPlay()
@@ -45,12 +49,16 @@ void AWoman::BeginPlay()
 void AWoman::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	if (AttributeComponent && PlayerOverlay)
+	{
+		AttributeComponent->RegenStamina(DeltaTime);
+		PlayerOverlay->SetStaminaBar(AttributeComponent->GetStaminaPercent());
+	}
 }
 
 void AWoman::GetHit(const FVector_NetQuantize& ImpactPoint, AActor* Hitter)
 {
-	if (HittedMontage == nullptr) return;
+	if (HittedMontage == nullptr || bIsDodging) return;
 
 	PlayAnimMontage(HittedMontage);
 	//CharacterState = ECharacterState::ESC_Beaten;
@@ -59,10 +67,17 @@ void AWoman::GetHit(const FVector_NetQuantize& ImpactPoint, AActor* Hitter)
 
 float AWoman::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (CharacterState == ECharacterState::ESC_Dodge || bIsDodging) return DamageAmount;
+
 	if (AttributeComponent && PlayerOverlay)
 	{
 		AttributeComponent->ReceiveDamage(DamageAmount);
 		PlayerOverlay->SetHealthBar(AttributeComponent->GetHelthPercent());
+
+		if (AttributeComponent->Get_Health()==0)
+		{
+			Die();
+		}
 	}
 	return DamageAmount;
 }
@@ -80,9 +95,21 @@ void AWoman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	EnhancedInputComponent->BindAction(IA_Jump, ETriggerEvent::Triggered, this, &AWoman::Jump);
 	EnhancedInputComponent->BindAction(IA_Equip, ETriggerEvent::Started, this, &AWoman::ETrigger);
 	EnhancedInputComponent->BindAction(IA_Attack, ETriggerEvent::Started, this, &AWoman::Attack);
+	EnhancedInputComponent->BindAction(IA_Dodge, ETriggerEvent::Started, this, &AWoman::Dodge);
+	EnhancedInputComponent->BindAction(IA_QuitGame, ETriggerEvent::Started, this, &AWoman::QuitGame);
+	EnhancedInputComponent->BindAction(IA_Replay, ETriggerEvent::Started, this, &AWoman::Replay);
 }
 
-
+void AWoman::Die()
+{
+	if (DeathMontage)
+	{
+		PlayAnimMontage(DeathMontage);
+	}
+	BisDead = true;
+	FTimerHandle WaittoReplay;
+	GetWorldTimerManager().SetTimer(WaittoReplay,this,&AWoman::PlayAgain,5.f);
+}
 
 void AWoman::AddMappingContextForCharacter()
 {
@@ -105,12 +132,12 @@ void AWoman::Looking(const FInputActionValue& Value)
 	if (LookValue.Y != 0.0)
 		AddControllerPitchInput(LookValue.Y);
 
-	bUseControllerRotationYaw = false;
+	
 }
 
 void AWoman::Moving(const FInputActionValue& Value)
 {
-	if (ActionState == EActionState::EAC_Attack || bIsAction || CharacterState == ECharacterState::ESC_Beaten) return;
+	if (ActionState == EActionState::EAC_Attack || bIsAction || CharacterState == ECharacterState::ESC_Beaten || bIsDodging || BisDead) return;
 
 	const FVector2D MoveValue = Value.Get<FVector2D>();
 	
@@ -125,7 +152,7 @@ void AWoman::Moving(const FInputActionValue& Value)
 
 void AWoman::Jump()
 {
-	if (ActionState == EActionState::EAC_Attack || bIsAction || CharacterState == ECharacterState::ESC_Beaten) return;
+	if (ActionState == EActionState::EAC_Attack || bIsAction || CharacterState == ECharacterState::ESC_Beaten || bIsDodging) return;
 
 	Super::Jump();
 }
@@ -179,6 +206,7 @@ void AWoman::DisArm()
 
 void AWoman::Attack()
 {
+	if (bIsDodging) return;
 	if (IsAttack)
 	{
 		bCanCombo = true;
@@ -195,6 +223,33 @@ void AWoman::Attack()
 	}
 }
 
+void AWoman::Dodge()
+{
+	if (DodgeMontage == nullptr || bIsDodging ||!bIsEnoughStamina(DodgeStaminaCost)) return;
+
+	PlayAnimMontage(DodgeMontage);
+	bIsDodging = true;
+	AttributeComponent->ReceiveStaminaCost(DodgeStaminaCost);
+	PlayerOverlay->SetStaminaBar(AttributeComponent->GetStaminaPercent());
+}
+
+void AWoman::QuitGame()
+{
+	/*APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	PlayerController->ConsoleCommand("quit");*/
+	UGameplayStatics::OpenLevel(this, FName("MainMenuMap"));
+}
+
+void AWoman::Replay()
+{
+	UGameplayStatics::OpenLevel(this, FName("ThirdPersonMap"));
+}
+
+void AWoman::PlayAgain()
+{
+	UGameplayStatics::OpenLevel(this, FName("ThirdPersonMap"));
+}
+
 void AWoman::InitiallizePlayeroverlay()
 {
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
@@ -207,4 +262,9 @@ void AWoman::InitiallizePlayeroverlay()
 			PlayerOverlay = PlayerHUD->GetPlayerOverlay();
 		}
 	}
+}
+
+bool AWoman::bIsEnoughStamina(float StaminaCost)
+{
+	return AttributeComponent->Get_Stamina()>StaminaCost;
 }

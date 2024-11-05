@@ -25,6 +25,9 @@ void UWomanAnimInstace::NativeUpdateAnimation(float DeltaSeconds)
 
 	GroundSpeed = UKismetMathLibrary::VSizeXY(MovementComponent->Velocity);
 
+	if (Character->Get_BisDead())
+		BisDead = true;
+
 	IsFalling = MovementComponent->IsFalling();
 
 	if (GroundSpeed > 0)

@@ -41,6 +41,8 @@ protected:
 	UAnimMontage* Get_Correct_Montage(const FVector& AttackDirection);
 
 protected:
+	bool BisDead = false;
+
 	UPROPERTY()
 	FVector AttackDirectTion;
 
